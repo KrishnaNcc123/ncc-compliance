@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NCC | Compliance v34</title>
+  <title>NCC | Compliance v41</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     :root {
@@ -11,171 +11,173 @@
       --text-main: #1e293b; --text-muted: #64748b;
       --crit: #ef4444; --maj: #f59e0b; --min: #3b82f6; --success: #10b981;
     }
+    * { box-sizing: border-box; transition: all 0.2s ease; font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { background: var(--bg); margin: 0; color: var(--text-main); font-size: 14px; }
 
-    * { box-sizing: border-box; transition: all 0.2s ease; }
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; color: var(--text-main); font-size: 14px; }
-
-    /* REFINED LOGIN UI */
+    /* LOGIN UI */
     #loginScreen { position: fixed; inset: 0; background: #f1f5f9; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-    .login-inner { width: 100%; max-width: 400px; padding: 20px; }
-    .login-card { background: #fff; border: 1px solid var(--border); padding: 30px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.05); text-align: center; }
-    .login-logo { font-weight: 900; font-size: 2.2rem; color: var(--primary); margin-bottom: 5px; letter-spacing: -1px; }
-    .login-title { font-weight: 700; font-size: 0.85rem; color: var(--navy); margin-bottom: 4px; }
-    .login-sub { text-transform: uppercase; font-size: 0.6rem; font-weight: 700; color: var(--text-muted); letter-spacing: 2px; margin-bottom: 25px; }
-    #lPin { text-align: center; font-size: 1.4rem; letter-spacing: 6px; height: 48px; background: #f8fafc; margin-top: 5px; }
+    .login-card { background: #fff; border: 1px solid var(--border); padding: 40px; border-radius: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.1); text-align: center; width: 100%; max-width: 420px; }
+    .login-logo { font-weight: 900; font-size: 2.5rem; color: var(--primary); letter-spacing: -2px; margin-bottom: 5px; }
+    #lPin { text-align: center; font-size: 1.5rem; letter-spacing: 8px; height: 55px; background: #f8fafc; border-radius: 15px; border: 2px solid var(--border); margin-top: 10px; }
 
-    /* LAYOUT & HEADER */
-    .app-header { background: #fff; padding: 12px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
-    .container { max-width: 1200px; margin: 1.5rem auto; padding: 0 20px; }
-    .hidden { display: none !important; }
-
-    /* CARDS & BUTTONS */
-    .card { background: #fff; border-radius: 20px; padding: 25px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); position: relative; }
-    .btn { cursor: pointer; border: none; border-radius: 10px; font-weight: 700; padding: 10px 20px; font-size: 11px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-primary { background: var(--navy); color: white; }
-    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+    .app-header { background: #fff; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; }
     
-    /* SETTINGS POPUP */
-    #pinBox { position: absolute; right: 0; top: 50px; background: white; border: 1px solid var(--border); border-radius: 16px; width: 280px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 2000; }
+    #pinBox { 
+        position: absolute; right: 0; top: 60px; background: white; border: 1px solid var(--border); 
+        border-radius: 20px; width: 300px; padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+        z-index: 2000; transform-origin: top right; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    #pinBox.hidden { display: none; transform: scale(0.8) translateY(-20px); opacity: 0; }
     .pin-success-banner { background: var(--success); color: white; font-size: 10px; font-weight: 800; padding: 8px; border-radius: 8px; text-align: center; margin-top: 10px; display: none; }
 
-    /* TABLE */
-    table { width: 100%; border-collapse: collapse; }
-    th { background: #f8fafc; padding: 12px; text-align: left; font-size: 9px; text-transform: uppercase; border-bottom: 1px solid var(--border); color: var(--text-muted); }
-    td { padding: 12px; border-bottom: 1px solid #f1f5f9; vertical-align: top; font-size: 13px; }
+    .container { max-width: 1200px; margin: 2rem auto; padding: 0 25px; }
+    .hidden { display: none !important; }
+    .card { background: #fff; border-radius: 24px; padding: 30px; border: 1px solid var(--border); margin-bottom: 25px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
+    
+    .btn { cursor: pointer; border: none; border-radius: 12px; font-weight: 700; padding: 12px 24px; font-size: 12px; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
+    .btn-primary { background: var(--navy); color: white; }
+    .btn-primary:hover { background: var(--primary); transform: translateY(-2px); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
 
-    /* REFINED ACTION BUTTONS */
-    .action-btn { font-size: 14px; cursor: pointer; border: 1px solid #e2e8f0; background: #fff; padding: 8px; border-radius: 8px; margin: 0 2px; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; }
-    .action-btn:hover { background: #f1f5f9; transform: translateY(-1px); }
-    .btn-edit { color: var(--primary); border-color: #dbeafe; }
-    .btn-del { color: #ef4444; border-color: #fee2e2; }
-
-    /* INPUTS */
-    input, select, textarea { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 10px; font-family: inherit; margin-bottom: 10px; background: #fcfdfe; }
-    label { font-size: 9px; font-weight: 800; color: var(--text-muted); display: block; margin-bottom: 4px; text-transform: uppercase; }
-
-    .photo-area { width: 100%; height: 160px; border: 2px dashed var(--border); border-radius: 15px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; background: #fbfcfe; }
-    .photo-area img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-
-    .score-widget { display: flex; gap: 10px; background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 8px 15px; }
-    .score-item { text-align: center; padding: 0 8px; border-right: 1px solid #f1f5f9; }
+    .score-widget { display: flex; gap: 8px; background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 10px 15px; }
+    .score-item { text-align: center; padding: 0 12px; border-right: 1px solid #f1f5f9; }
+    .score-item:last-child { border: none; }
     .score-val { display: block; font-weight: 800; font-size: 16px; }
-    .badge { padding: 3px 7px; border-radius: 5px; font-size: 8px; font-weight: 800; text-transform: uppercase; }
+    .score-lab { font-size: 8px; font-weight: 800; text-transform: uppercase; color: var(--text-muted); }
+
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #f8fafc; padding: 15px; text-align: left; font-size: 10px; text-transform: uppercase; font-weight: 800; color: var(--text-muted); }
+    td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+    
+    .action-btn { 
+        border: 1.5px solid #e2e8f0; 
+        background: #fff; 
+        padding: 10px; 
+        border-radius: 12px; 
+        cursor: pointer; 
+        font-size: 18px; 
+        margin: 0 5px; 
+        width: 44px; 
+        height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-edit:hover { border-color: var(--primary); background: #eff6ff; }
+    .btn-del:hover { border-color: var(--crit); background: #fef2f2; }
+    .btn-edit { color: var(--primary); }
+    .btn-del { color: var(--crit); }
+
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; }
     .bg-crit { background: #fee2e2; color: #ef4444; }
     .bg-maj { background: #fef3c7; color: #d97706; }
     .bg-min { background: #dbeafe; color: #2563eb; }
 
-    #imageModal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 40px; }
-    #imageModal img { max-width: 80%; max-height: 80%; border: 5px solid #fff; border-radius: 8px; }
+    input, select, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: #fcfdfe; }
+    label { font-size: 10px; font-weight: 800; color: var(--text-muted); margin-bottom: 6px; display: block; text-transform: uppercase; }
+    
+    .photo-area { width: 100%; height: 180px; border: 2px dashed var(--border); border-radius: 20px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; overflow: hidden; background: #fbfcfe; }
+    .photo-area img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   </style>
 </head>
 <body>
 
-<div id="imageModal" onclick="this.style.display='none'"><img id="modalImg" src=""></div>
+<div id="imageModal" onclick="this.style.display='none'" style="position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:10000; display:none; align-items:center; justify-content:center;">
+    <img id="modalImg" src="" style="max-width:85%; max-height:85%; border:5px solid #fff; border-radius:12px;">
+</div>
 
 <div id="loginScreen">
-  <div class="login-inner">
-    <div class="login-card">
-        <div class="login-logo">NCC</div>
-        <h1 class="login-title">NETWORK CLOTHING COMPANY</h1>
-        <p class="login-sub">Compliance Management</p>
-        
-        <div style="text-align: left;">
-            <label>Select Unit</label>
-            <select id="lUnit">
-                <option value="NCC HR">HR MASTER ADMIN</option>
-                <option value="UNIT - I (VERTEX)">UNIT - I (VERTEX)</option>
-                <option value="UNIT - II (PRINTING & EMB)">UNIT - II (PRINTING & EMB)</option>
-                <option value="SPECTRA - PROCESSING DIVISION">SPECTRA - PROCESSING DIVISION</option>
-                <option value="UNIT - V (RELAY)">UNIT - V (RELAY)</option>
-                <option value="UNIT - X (PATRIOT)">UNIT - X (PATRIOT)</option>
-            </select>
-            <label>Security Access PIN</label>
-            <input type="password" id="lPin" placeholder="••••" maxlength="6">
-        </div>
-        <button class="btn btn-primary" style="width:100%; height:45px; margin-top:10px;" onclick="login()">Enter System</button>
+  <div class="login-card">
+    <div class="login-logo">NCC</div>
+    <p style="font-weight:800; font-size:0.9rem; color:var(--navy); margin-bottom:25px; letter-spacing:1px;">NETWORK CLOTHING COMPANY</p>
+    <div style="text-align: left; padding: 0 10px;">
+        <label>Unit Selection</label>
+        <select id="lUnit">
+            <option value="NCC HR">HR MASTER ADMIN</option>
+            <option value="UNIT - I (VERTEX)">UNIT - I (VERTEX)</option>
+            <option value="UNIT - II (PRINTING & EMB)">UNIT - II (PRINTING & EMB)</option>
+            <option value="SPECTRA - PROCESSING DIVISION">SPECTRA - PROCESSING DIVISION</option>
+            <option value="UNIT - V (RELAY)">UNIT - V (RELAY)</option>
+            <option value="UNIT - X (PATRIOT)">UNIT - X (PATRIOT)</option>
+        </select>
+        <label style="margin-top:15px;">Security Access PIN</label>
+        <input type="password" id="lPin" maxlength="6" placeholder="••••">
     </div>
+    <button class="btn btn-primary" style="width:100%; height:50px; margin-top:20px; justify-content:center;" onclick="login()">Enter Portal</button>
   </div>
 </div>
 
 <div id="app" class="hidden">
   <header class="app-header">
-    <div style="font-weight:800; font-size:1.3rem; color:var(--primary); cursor:pointer;" onclick="showHome()">NCC</div>
-    <div style="display:flex; align-items:center; gap:10px;">
-        <span id="userTag" style="font-size:10px; font-weight:800; color:var(--primary);"></span>
+    <div style="font-weight:900; font-size:1.5rem; color:var(--primary); cursor:pointer;" onclick="showHome()">NCC</div>
+    <div style="display:flex; align-items:center; gap:12px;">
+        <button id="syncBtn" class="btn btn-outline" onclick="fetchFromCloud()">☁️ Sync Cloud</button>
         <div id="pinSettings" class="hidden" style="position:relative;">
-            <button class="btn btn-outline" onclick="document.getElementById('pinBox').classList.toggle('hidden')">⚙️</button>
+            <button class="btn btn-outline" onclick="togglePinBox()">⚙️</button>
             <div id="pinBox" class="hidden">
-                <h4 style="margin:0 0 12px; font-size:11px;">Manage Unit PINs</h4>
+                <h4 style="margin:0 0 15px; font-size:12px; font-weight:800;">Password Management</h4>
                 <div id="pinList"></div>
-                <div id="pinSuccess" class="pin-success-banner">✓ PIN UPDATED</div>
+                <div id="pinSuccess" class="pin-success-banner">✓ CHANGES SAVED</div>
             </div>
         </div>
-        <button class="btn btn-outline" onclick="location.reload()">LOGOUT</button>
+        <span id="userTag" style="font-size:11px; font-weight:800; color:var(--primary);"></span>
+        <button class="btn btn-outline" onclick="location.reload()">Log Out</button>
     </div>
   </header>
 
   <div id="dash" class="container">
-    <div id="hrNew" class="card hidden">
-        <label>Start New Monthly Audit</label>
-        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr auto; gap:10px; align-items:end;">
-            <select id="nUnit">
-                <option>UNIT - I (VERTEX)</option>
-                <option>UNIT - II (PRINTING & EMB)</option>
-                <option>SPECTRA - PROCESSING DIVISION</option>
-                <option>UNIT - V (RELAY)</option>
-                <option>UNIT - X (PATRIOT)</option>
-            </select>
+    <div id="hrNew" class="card hidden" style="border-top:5px solid var(--primary);">
+        <label>Create Audit Schedule</label>
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1.2fr auto; gap:12px; align-items:end;">
+            <select id="nUnit"><option>UNIT - I (VERTEX)</option><option>UNIT - II (PRINTING & EMB)</option><option>SPECTRA - PROCESSING DIVISION</option><option>UNIT - V (RELAY)</option><option>UNIT - X (PATRIOT)</option></select>
             <select id="nCat"><option>INTERNAL AUDIT</option><option>5S COMPLIANCE</option><option>SAFETY AUDIT</option></select>
             <input type="date" id="nDate">
-            <button class="btn btn-primary" onclick="addRep()">Create</button>
+            <button class="btn btn-primary" onclick="addRep()">Create Folder</button>
         </div>
     </div>
-    <div id="repGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:15px;"></div>
+    <div id="repGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:20px;"></div>
   </div>
 
   <div id="details" class="container hidden">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <button class="btn btn-outline" onclick="showHome()">← BACK</button>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <button class="btn btn-outline" onclick="showHome()">← Back to Dashboard</button>
         <div class="score-widget">
-            <div class="score-item"><span id="sTot" class="score-val">0</span><span style="font-size:8px;">TOTAL</span></div>
-            <div class="score-item" style="color:var(--crit)"><span id="sCri" class="score-val">0</span><span style="font-size:8px;">CRIT</span></div>
-            <div class="score-item" style="color:var(--maj)"><span id="sMaj" class="score-val">0</span><span style="font-size:8px;">MAJ</span></div>
+            <div class="score-item"><span id="sTot" class="score-val">0</span><span class="score-lab">Total</span></div>
+            <div class="score-item" style="color:var(--crit)"><span id="sCri" class="score-val">0</span><span class="score-lab">Crit</span></div>
+            <div class="score-item" style="color:var(--maj)"><span id="sMaj" class="score-val">0</span><span class="score-lab">Maj</span></div>
+            <div class="score-item" style="color:var(--min)"><span id="sMin" class="score-val">0</span><span class="score-lab">Min</span></div>
         </div>
     </div>
 
-    <div class="card" style="border-left:8px solid var(--primary); display:flex; justify-content:space-between; align-items:center; padding:15px 25px;">
-        <div>
-            <h2 id="hTitle" style="margin:0; font-size:18px; font-weight:800;"></h2>
-            <p id="hUnit" style="margin:2px 0 0; font-weight:700; color:var(--primary); font-size:11px;"></p>
-        </div>
-        <div id="lockZone" class="hidden"><span id="lockIco" style="font-size:28px; cursor:pointer;" onclick="toggleLock()"></span></div>
+    <div class="card" style="border-left:10px solid var(--primary); padding:20px 30px;">
+        <h2 id="hTitle" style="margin:0; font-size:20px; font-weight:800;"></h2>
+        <p id="hUnit" style="margin:4px 0 0; color:var(--primary); font-size:12px; font-weight:700; text-transform:uppercase;"></p>
     </div>
 
-    <div id="addSection" class="card">
-        <h4 id="formMode" style="margin:0 0 12px 0; font-size:11px; color:var(--primary);">ENTRY FORM</h4>
-        <div style="display:grid; grid-template-columns: 2fr 1.2fr; gap:20px;">
+    <div id="addSection" class="card" style="text-align: center;">
+        <h4 style="text-align:left; font-size:12px; margin-bottom:15px; color:var(--text-muted);">ADD NON-CONFORMITY</h4>
+        <div style="display:grid; grid-template-columns: 1.5fr 1fr; gap:25px; text-align:left;">
             <div>
-                <label>Observation Detail</label>
-                <textarea id="fDesc" rows="3"></textarea>
-                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px;">
-                    <div><label>Dept</label><select id="fDept"><option>SEWING</option><option>CUTTING</option><option>QUALITY</option><option>FINISHING</option></select></div>
-                    <div><label>Class</label><select id="fSev"><option value="crit">CRITICAL</option><option value="maj">MAJOR</option><option value="min">MINOR</option></select></div>
+                <label>Observation Details</label>
+                <textarea id="fDesc" rows="4" placeholder="Enter findings..."></textarea>
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:10px;">
+                    <div><label>Dept</label><select id="fDept"><option>SEWING</option><option>CUTTING</option><option>QUALITY</option><option>FINISHING</option><option>MAINTENANCE</option></select></div>
+                    <div><label>Severity</label><select id="fSev"><option value="crit">CRITICAL</option><option value="maj">MAJOR</option><option value="min">MINOR</option></select></div>
                     <div><label>Status</label><select id="fStat"><option>Open</option><option>Closed</option></select></div>
                 </div>
             </div>
             <div class="photo-area" onclick="document.getElementById('fFile').click()">
-                <span id="fPrompt">📸 CAPTURE PHOTO</span>
+                <span id="fPrompt">📸 SNAP PHOTO</span>
                 <input type="file" id="fFile" hidden accept="image/*" onchange="loadImg(this)">
                 <img id="fPreview" style="display:none;">
             </div>
         </div>
-        <button class="btn btn-primary" style="width:100%; margin-top:15px; height:45px;" onclick="saveNC()">Sync & Save Finding</button>
+        <button class="btn btn-primary" style="margin-top:25px; padding:15px 60px; font-size:14px;" onclick="saveNC()">UPLOAD TO CLOUD DATABASE</button>
     </div>
 
     <div class="card" style="padding:0; overflow:hidden;">
         <table>
-            <thead><tr><th>Photo</th><th>Dept</th><th>Observation</th><th>Class</th><th>Status</th><th>Manage</th></tr></thead>
+            <thead><tr><th>Evidence</th><th>Dept</th><th>Observation</th><th>Class</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody id="fTable"></tbody>
         </table>
     </div>
@@ -183,17 +185,23 @@
 </div>
 
 <script>
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxsZHzh3n2CXGs6GMdKUcL6ebFN4x3YFrjMxTY4hiR_trG4NPiPA_QB5M9I2TQR4pJ9QQ/exec"; 
-
-    let db = JSON.parse(localStorage.getItem('ncc_v31_db')) || [];
-    let pins = JSON.parse(localStorage.getItem('ncc_v32_pins')) || {
-        "NCC HR":"1234", "UNIT - I (VERTEX)":"1111", "UNIT - II (PRINTING & EMB)":"2222",
-        "SPECTRA - PROCESSING DIVISION":"3333", "UNIT - V (RELAY)":"5555", "UNIT - X (PATRIOT)":"9999"
-    };
+    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbzrTCN2KKT9BpiYpfANP5SMbQg-mB1na6Va573MHulOhxcCITO7g3Ithdy2Gv8RP7VowA/exec";
     
-    let user = ""; let isHR = false; let activeID = null; let tempImg = ""; let editIdx = null;
+    let db = [];
+    
+    // FORCED PASSWORDS (Removed localStorage to ensure code updates work instantly)
+    let pins = {
+        "NCC HR": "3355", 
+        "UNIT - I (VERTEX)": "1100", 
+        "UNIT - II (PRINTING & EMB)": "0220", 
+        "SPECTRA - PROCESSING DIVISION": "8822", 
+        "UNIT - V (RELAY)": "5151", 
+        "UNIT - X (PATRIOT)": "1001"
+    };
 
-    function login() {
+    let user = ""; let isHR = false; let activeTitle = ""; let activeUnit = ""; let tempImg = "";
+
+    async function login() {
         const u = document.getElementById('lUnit').value;
         const p = document.getElementById('lPin').value;
         if(pins[u] === p) {
@@ -201,26 +209,46 @@
             document.getElementById('userTag').innerText = u;
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('app').classList.remove('hidden');
-            if(isHR) { renderPinList(); document.getElementById('hrNew').classList.remove('hidden'); document.getElementById('pinSettings').classList.remove('hidden'); }
-            showHome();
+            if(isHR) { 
+                document.getElementById('hrNew').classList.remove('hidden'); 
+                document.getElementById('pinSettings').classList.remove('hidden'); 
+                renderPinList(); 
+            }
+            await fetchFromCloud();
         } else { alert("Invalid Security PIN"); }
     }
+
+    function togglePinBox() { document.getElementById('pinBox').classList.toggle('hidden'); }
 
     function renderPinList() {
         const list = document.getElementById('pinList'); list.innerHTML = '';
         for(let u in pins) {
-            const isHRItem = (u === "NCC HR");
-            list.innerHTML += `<div style="margin-bottom:10px; padding:6px; border-radius:8px; border:${isHRItem?'1px solid var(--primary)':'none'}; background:${isHRItem?'#f0f7ff':'transparent'}">
-                <label style="font-size:8px;">${u} ${isHRItem?'(MASTER)':''}</label>
-                <input type="text" value="${pins[u]}" style="padding:4px; height:28px; margin:0;" onchange="updatePin('${u}', this.value)"></div>`;
+            list.innerHTML += `<div style="margin-bottom:12px;"><label style="font-size:8px;">${u}</label>
+            <input type="text" value="${pins[u]}" style="padding:8px; height:35px; font-size:12px; font-weight:700;" onchange="updatePin('${u}', this.value)"></div>`;
         }
     }
 
     function updatePin(u, v) {
-        if(v.length < 4) return alert("Min 4 digits");
-        pins[u] = v; save();
+        pins[u] = v;
         const banner = document.getElementById('pinSuccess'); banner.style.display = 'block';
         setTimeout(() => { banner.style.display = 'none'; }, 2000);
+    }
+
+    async function fetchFromCloud() {
+        const btn = document.getElementById('syncBtn'); btn.innerText = "⌛ Syncing...";
+        try {
+            const response = await fetch(GOOGLE_URL);
+            const allData = await response.json();
+            const groups = {};
+            allData.forEach(item => {
+                const key = `${item.unit}|${item.title}`;
+                if(!groups[key]) groups[key] = { unit: item.unit, title: item.title, findings: [] };
+                groups[key].findings.push(item);
+            });
+            db = Object.values(groups);
+            showHome();
+        } catch(e) { console.error("Sync Failure", e); }
+        btn.innerText = "☁️ Sync Cloud";
     }
 
     function showHome() {
@@ -228,16 +256,88 @@
         document.getElementById('details').classList.add('hidden');
         const grid = document.getElementById('repGrid'); grid.innerHTML = '';
         const data = isHR ? db : db.filter(r => r.unit === user);
+        
         data.forEach(r => {
-            grid.innerHTML += `<div class="card" style="padding:20px;">
-                ${isHR ? `<span onclick="quickToggle(${r.id})" style="position:absolute; top:15px; right:15px; cursor:pointer; font-size:18px;">${r.locked?'🔒':'🔓'}</span>` : ''}
-                <div onclick="openRep(${r.id})" style="cursor:pointer;">
-                    <div style="font-size:8px; font-weight:800; color:var(--text-muted)">${r.unit}</div>
-                    <h3 style="margin:8px 0; font-size:14px;">${r.title}</h3>
-                    <div style="font-weight:700; color:var(--primary); font-size:10px;">${r.findings.length} Findings Total</div>
-                </div>
+            grid.innerHTML += `<div class="card" onclick="openRep('${r.unit}', '${r.title}')" style="cursor:pointer; padding:25px; border-bottom:4px solid #eee;">
+                <div style="font-size:9px; font-weight:900; color:var(--text-muted); text-transform:uppercase;">${r.unit}</div>
+                <h3 style="margin:10px 0; font-size:16px; font-weight:800;">${r.title}</h3>
+                <div style="font-weight:800; color:var(--primary); font-size:11px;">${r.findings.length} RECORDS</div>
             </div>`;
         });
+    }
+
+    function openRep(unit, title) {
+        activeUnit = unit; activeTitle = title;
+        document.getElementById('hTitle').innerText = title; document.getElementById('hUnit').innerText = unit;
+        document.getElementById('dash').classList.add('hidden'); document.getElementById('details').classList.remove('hidden');
+        document.getElementById('addSection').className = (isHR || user === unit) ? 'card' : 'hidden';
+        renderTable();
+    }
+
+    function renderTable() {
+        const report = db.find(r => r.unit === activeUnit && r.title === activeTitle) || { findings: [] };
+        const tbody = document.getElementById('fTable'); tbody.innerHTML = '';
+        let s = {tot:0, crit:0, maj:0, min:0};
+        
+        report.findings.forEach((f, idx) => {
+            s.tot++; s[f.sev]++;
+            tbody.innerHTML += `<tr>
+                <td><img src="${f.img}" style="width:55px; height:55px; border-radius:10px; object-fit:cover; cursor:zoom-in;" onclick="zoomImg('${f.img}')"></td>
+                <td style="font-weight:800; font-size:11px;">${f.dept}</td>
+                <td style="max-width:350px; line-height:1.5; font-weight:500;">${f.desc}</td>
+                <td><span class="badge bg-${f.sev}">${f.sev}</span></td>
+                <td><span style="font-weight:900; font-size:10px; color:${f.stat==='Open'?'#ef4444':'#10b981'}">${f.stat.toUpperCase()}</span></td>
+                <td>
+                    <button class="action-btn btn-edit" onclick="editRow('${idx}')">✎</button>
+                    <button class="action-btn btn-del" onclick="deleteRow('${idx}')">🗑</button>
+                </td>
+            </tr>`;
+        });
+        document.getElementById('sTot').innerText = s.tot; document.getElementById('sCri').innerText = s.crit;
+        document.getElementById('sMaj').innerText = s.maj; document.getElementById('sMin').innerText = s.min;
+    }
+
+    function deleteRow(idx) {
+        if(!isHR) return alert("Restricted: Only HR Admin can remove entries.");
+        if(confirm("HR MASTER ACCESS: Delete this record?")) {
+            const rIdx = db.findIndex(r => r.unit === activeUnit && r.title === activeTitle);
+            db[rIdx].findings.splice(idx, 1);
+            renderTable();
+        }
+    }
+
+    function editRow(idx) {
+        const rIdx = db.findIndex(r => r.unit === activeUnit && r.title === activeTitle);
+        const data = db[rIdx].findings[idx];
+        document.getElementById('fDesc').value = data.desc;
+        document.getElementById('fDept').value = data.dept;
+        document.getElementById('fSev').value = data.sev;
+        document.getElementById('fStat').value = data.stat;
+        if(data.img !== "No Photo") {
+            document.getElementById('fPreview').src = data.img;
+            document.getElementById('fPreview').style.display = 'block';
+            document.getElementById('fPrompt').style.display = 'none';
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function saveNC() {
+        const desc = document.getElementById('fDesc').value; if(!desc) return alert("Observation required");
+        const entry = { unit: activeUnit, title: activeTitle, dept: document.getElementById('fDept').value, desc: desc, sev: document.getElementById('fSev').value, stat: document.getElementById('fStat').value, img: tempImg || "No Photo" };
+        const rIdx = db.findIndex(r => r.unit === activeUnit && r.title === activeTitle);
+        db[rIdx].findings.unshift(entry);
+        renderTable(); resetForm();
+        await fetch(GOOGLE_URL, { method: "POST", mode: "no-cors", body: JSON.stringify(entry) });
+        setTimeout(fetchFromCloud, 2000);
+    }
+
+    function addRep() {
+        const date = document.getElementById('nDate').value; if(!date) return alert("Date required");
+        const m = new Date(date).toLocaleString('default', { month: 'long', year: 'numeric' }).toUpperCase();
+        const title = `${document.getElementById('nCat').value} - ${m}`;
+        const unit = document.getElementById('nUnit').value;
+        if(!db.find(r => r.unit === unit && r.title === title)) db.unshift({ unit: unit, title: title, findings: [] });
+        showHome();
     }
 
     function loadImg(input) {
@@ -247,13 +347,11 @@
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    let w = img.width; let h = img.height;
-                    const max = 800;
-                    if (w > h) { if (w > max) { h *= max / w; w = max; } }
-                    else { if (h > max) { w *= max / h; h = max; } }
+                    let w = img.width, h = img.height;
+                    if (w > 800) { h *= 800 / w; w = 800; }
                     canvas.width = w; canvas.height = h;
                     canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    tempImg = canvas.toDataURL('image/jpeg', 0.7);
+                    tempImg = canvas.toDataURL('image/jpeg', 0.6);
                     document.getElementById('fPreview').src = tempImg;
                     document.getElementById('fPreview').style.display = 'block';
                     document.getElementById('fPrompt').style.display = 'none';
@@ -263,86 +361,8 @@
             reader.readAsDataURL(input.files[0]);
         }
     }
-
-    async function saveNC() {
-        const desc = document.getElementById('fDesc').value; if(!desc) return alert("Observation is required");
-        const rIdx = db.findIndex(x => x.id === activeID);
-        const report = db[rIdx];
-        const entry = {
-            dept: document.getElementById('fDept').value,
-            desc: desc, sev: document.getElementById('fSev').value,
-            stat: document.getElementById('fStat').value,
-            img: tempImg || "No Photo"
-        };
-        if(editIdx !== null) db[rIdx].findings[editIdx] = entry;
-        else db[rIdx].findings.unshift(entry);
-        save(); renderTable(); resetForm();
-        fetch(GOOGLE_SCRIPT_URL, {
-            method: "POST", mode: "no-cors", cache: "no-cache",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ unit: report.unit, title: report.title, ...entry })
-        }).then(() => console.log("Cloud Updated")).catch(e => console.log("Offline"));
-    }
-
-    function quickToggle(id) { const r = db.find(x => x.id === id); r.locked = !r.locked; save(); showHome(); }
-    function openRep(id) {
-        activeID = id; editIdx = null; const r = db.find(x => x.id === id);
-        document.getElementById('hTitle').innerText = r.title; document.getElementById('hUnit').innerText = r.unit;
-        document.getElementById('dash').classList.add('hidden'); document.getElementById('details').classList.remove('hidden');
-        if(isHR) { document.getElementById('lockZone').classList.remove('hidden'); document.getElementById('lockIco').innerText = r.locked ? "🔒" : "🔓"; }
-        document.getElementById('addSection').className = (r.locked || !isHR) ? 'hidden' : 'card';
-        resetForm(); renderTable();
-    }
-    function addRep() {
-        const date = document.getElementById('nDate').value; if(!date) return alert("Select Date");
-        const m = new Date(date).toLocaleString('default', { month: 'long', year: 'numeric' }).toUpperCase();
-        db.unshift({ id: Date.now(), unit: document.getElementById('nUnit').value, title: `${document.getElementById('nCat').value} - ${m}`, locked: false, findings: [] });
-        save(); showHome();
-    }
-    function toggleLock() { const r = db.find(x => x.id === activeID); r.locked = !r.locked; save(); openRep(activeID); }
-    
-    function renderTable() {
-        const r = db.find(x => x.id === activeID); const tbody = document.getElementById('fTable'); tbody.innerHTML = '';
-        let c = {crit:0, maj:0, min:0};
-        r.findings.forEach((f, i) => {
-            c[f.sev]++;
-            tbody.innerHTML += `<tr>
-                <td><img src="${f.img}" style="width:50px; height:50px; border-radius:8px; object-fit:cover; cursor:zoom-in;" onclick="zoomImg('${f.img}')"></td>
-                <td style="font-weight:800; font-size:10px;">${f.dept}</td>
-                <td style="max-width:350px; line-height:1.4;">${f.desc}</td>
-                <td><span class="badge bg-${f.sev}">${f.sev}</span></td>
-                <td><span style="font-weight:800; font-size:9px; color:${f.stat==='Open'?'red':'green'}">${f.stat}</span></td>
-                <td style="white-space:nowrap;">
-                    ${(!r.locked && isHR) ? `
-                        <button class="action-btn btn-edit" onclick="editNC(${i})">📝</button>
-                        <button class="action-btn btn-del" onclick="delNC(${i})">🗑️</button>
-                    ` : '-'}
-                </td>
-            </tr>`;
-        });
-        document.getElementById('sTot').innerText = r.findings.length;
-        document.getElementById('sCri').innerText = c.crit; document.getElementById('sMaj').innerText = c.maj;
-    }
-
+    function resetForm() { tempImg = ""; document.getElementById('fDesc').value = ''; document.getElementById('fPreview').style.display = 'none'; document.getElementById('fPrompt').style.display = 'block'; }
     function zoomImg(src) { document.getElementById('modalImg').src = src; document.getElementById('imageModal').style.display = 'flex'; }
-    function editNC(i) {
-        editIdx = i; const f = db.find(x => x.id === activeID).findings[i];
-        document.getElementById('fDesc').value = f.desc; document.getElementById('fDept').value = f.dept;
-        document.getElementById('fSev').value = f.sev; document.getElementById('fStat').value = f.stat;
-        tempImg = f.img; document.getElementById('fPreview').src = f.img;
-        document.getElementById('fPreview').style.display = 'block'; document.getElementById('fPrompt').style.display = 'none';
-        document.getElementById('formMode').innerText = "EDITING FINDING"; window.scrollTo(0,0);
-    }
-    function delNC(i) { if(confirm("Delete finding?")) { const rIdx = db.findIndex(x => x.id === activeID); db[rIdx].findings.splice(i, 1); save(); renderTable(); } }
-    function resetForm() {
-        editIdx = null; tempImg = ""; document.getElementById('fDesc').value = '';
-        document.getElementById('fPreview').style.display = 'none'; document.getElementById('fPrompt').style.display = 'block';
-        document.getElementById('formMode').innerText = "ENTRY FORM";
-    }
-    function save() { 
-        localStorage.setItem('ncc_v31_db', JSON.stringify(db)); 
-        localStorage.setItem('ncc_v32_pins', JSON.stringify(pins));
-    }
 </script>
 </body>
 </html>
