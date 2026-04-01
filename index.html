@@ -339,30 +339,53 @@
         if(!db.find(r => r.unit === unit && r.title === title)) db.unshift({ unit: unit, title: title, findings: [] });
         showHome();
     }
-
-    function loadImg(input) {
-        if(input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let w = img.width, h = img.height;
-                    if (w > 800) { h *= 800 / w; w = 800; }
-                    canvas.width = w; canvas.height = h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                    tempImg = canvas.toDataURL('image/jpeg', 0.6);
-                    document.getElementById('fPreview').src = tempImg;
-                    document.getElementById('fPreview').style.display = 'block';
-                    document.getElementById('fPrompt').style.display = 'none';
-                };
-                img.src = e.target.result;
+  
+function loadImg(input) {
+    if(input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                let w = img.width, h = img.height;
+                // Reduce maximum width to 600px for faster syncing
+                if (w > 600) { h *= 600 / w; w = 600; }
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                // Lowered quality to 0.4 for 40% smaller file size
+                tempImg = canvas.toDataURL('image/jpeg', 0.4); 
+                document.getElementById('fPreview').src = tempImg;
+                document.getElementById('fPreview').style.display = 'block';
+                document.getElementById('fPrompt').style.display = 'none';
             };
-            reader.readAsDataURL(input.files[0]);
-        }
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
     }
-    function resetForm() { tempImg = ""; document.getElementById('fDesc').value = ''; document.getElementById('fPreview').style.display = 'none'; document.getElementById('fPrompt').style.display = 'block'; }
-    function zoomImg(src) { document.getElementById('modalImg').src = src; document.getElementById('imageModal').style.display = 'flex'; }
+}
+
+// OPTIONAL: Add a "Loading" overlay so users know the app is working
+async function fetchFromCloud() {
+    const btn = document.getElementById('syncBtn');
+    btn.style.opacity = "0.5";
+    btn.innerText = "⌛ Downloading...";
+    try {
+        const response = await fetch(GOOGLE_URL);
+        const allData = await response.json();
+        // Clear local DB before update to save memory
+        db = []; 
+        const groups = {};
+        allData.forEach(item => {
+            const key = `${item.unit}|${item.title}`;
+            if(!groups[key]) groups[key] = { unit: item.unit, title: item.title, findings: [] };
+            groups[key].findings.push(item);
+        });
+        db = Object.values(groups);
+        showHome();
+    } catch(e) { alert("Network too slow. Try again."); }
+    btn.style.opacity = "1";
+    btn.innerText = "☁️ Sync Cloud";
+}
 </script>
 </body>
 </html>
