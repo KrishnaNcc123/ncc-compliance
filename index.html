@@ -188,8 +188,6 @@
     const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbzrTCN2KKT9BpiYpfANP5SMbQg-mB1na6Va573MHulOhxcCITO7g3Ithdy2Gv8RP7VowA/exec";
     
     let db = [];
-    
-    // FORCED PASSWORDS (Removed localStorage to ensure code updates work instantly)
     let pins = {
         "NCC HR": "3355", 
         "UNIT - I (VERTEX)": "1100", 
@@ -235,10 +233,13 @@
     }
 
     async function fetchFromCloud() {
-        const btn = document.getElementById('syncBtn'); btn.innerText = "⌛ Syncing...";
+        const btn = document.getElementById('syncBtn');
+        btn.style.opacity = "0.5";
+        btn.innerText = "⌛ Downloading...";
         try {
             const response = await fetch(GOOGLE_URL);
             const allData = await response.json();
+            db = []; 
             const groups = {};
             allData.forEach(item => {
                 const key = `${item.unit}|${item.title}`;
@@ -247,7 +248,8 @@
             });
             db = Object.values(groups);
             showHome();
-        } catch(e) { console.error("Sync Failure", e); }
+        } catch(e) { alert("Network too slow. Try again."); }
+        btn.style.opacity = "1";
         btn.innerText = "☁️ Sync Cloud";
     }
 
@@ -267,67 +269,54 @@
     }
 
     function openRep(unit, title) {
-    activeUnit = unit; 
-    activeTitle = title;
-    
-    document.getElementById('hTitle').innerText = title; 
-    document.getElementById('hUnit').innerText = unit;
-    document.getElementById('dash').classList.add('hidden'); 
-    document.getElementById('details').classList.remove('hidden');
-    
-    // STRICT LOCK: Only "NCC HR" can see the "Add New NC" form
-    if (isHR) {
-        document.getElementById('addSection').classList.remove('hidden');
-    } else {
-        document.getElementById('addSection').classList.add('hidden');
+        activeUnit = unit; activeTitle = title;
+        document.getElementById('hTitle').innerText = title; 
+        document.getElementById('hUnit').innerText = unit;
+        document.getElementById('dash').classList.add('hidden'); 
+        document.getElementById('details').classList.remove('hidden');
+        
+        if (isHR) { document.getElementById('addSection').classList.remove('hidden'); } 
+        else { document.getElementById('addSection').classList.add('hidden'); }
+        renderTable();
     }
-    
-    renderTable();
-}
 
-function renderTable() {
-    const report = db.find(r => r.unit === activeUnit && r.title === activeTitle) || { findings: [] };
-    const tbody = document.getElementById('fTable'); 
-    tbody.innerHTML = '';
-    
-    report.findings.forEach((f, idx) => {
-        // STRICT LOCK: Only HR gets the action buttons
-        let actionColumn = "";
-        if (isHR) {
-            actionColumn = `
+    function renderTable() {
+        const report = db.find(r => r.unit === activeUnit && r.title === activeTitle) || { findings: [] };
+        const tbody = document.getElementById('fTable'); 
+        tbody.innerHTML = '';
+        
+        report.findings.forEach((f, idx) => {
+            let actionColumn = isHR ? `
                 <td>
                     <button class="action-btn btn-edit" onclick="editRow('${idx}')">✎</button>
                     <button class="action-btn btn-del" onclick="deleteRow('${idx}')">🗑</button>
-                </td>`;
-        } else {
-            // Units see a "Read Only" or Status badge instead
-            actionColumn = `<td><span style="font-size:10px; color:#999;">VIEW ONLY</span></td>`;
-        }
+                </td>` : `<td><span style="font-size:10px; color:#999;">VIEW ONLY</span></td>`;
 
-        tbody.innerHTML += `<tr>
-            <td><img src="${f.img}" style="width:55px; height:55px; border-radius:10px; object-fit:cover;" onclick="zoomImg('${f.img}')"></td>
-            <td style="font-weight:800;">${f.dept}</td>
-            <td style="max-width:300px;">${f.desc}</td>
-            <td><span class="badge bg-${f.sev}">${f.sev}</span></td>
-            <td><span style="font-weight:900; color:${f.stat==='Open'?'#ef4444':'#10b981'}">${f.stat.toUpperCase()}</span></td>
-            ${actionColumn}
-        </tr>`;
-    });
-}
+            tbody.innerHTML += `<tr>
+                <td><img src="${f.img}" style="width:55px; height:55px; border-radius:10px; object-fit:cover;" onclick="zoomImg('${f.img}')"></td>
+                <td style="font-weight:800;">${f.dept}</td>
+                <td style="max-width:300px;">${f.desc}</td>
+                <td><span class="badge bg-${f.sev}">${f.sev}</span></td>
+                <td><span style="font-weight:900; color:${f.stat==='Open'?'#ef4444':'#10b981'}">${f.stat.toUpperCase()}</span></td>
+                ${actionColumn}
+            </tr>`;
+        });
+        updateScore(report.findings);
+    }
 
-function deleteRow(idx) {
-    // FINAL SECURITY CHECK
-    if (!isHR) {
-        alert("ACCESS DENIED: Only HR Admin can delete records.");
-        return;
+    function updateScore(findings) {
+        document.getElementById('sTot').innerText = findings.length;
+        document.getElementById('sCri').innerText = findings.filter(f => f.sev === 'crit').length;
+        document.getElementById('sMaj').innerText = findings.filter(f => f.sev === 'maj').length;
+        document.getElementById('sMin').innerText = findings.filter(f => f.sev === 'min').length;
     }
-    
-    if (confirm("HR MASTER ACCESS: Delete this record permanently?")) {
-        const rIdx = db.findIndex(r => r.unit === activeUnit && r.title === activeTitle);
-        db[rIdx].findings.splice(idx, 1);
-        renderTable();
-        // The deletion will sync to Google Sheets on the next fetch/save
-    }
+
+    function deleteRow(idx) {
+        if (!isHR) return alert("ACCESS DENIED");
+        if (confirm("HR MASTER ACCESS: Delete record?")) {
+            const rIdx = db.findIndex(r => r.unit === activeUnit && r.title === activeTitle);
+            db[rIdx].findings.splice(idx, 1);
+            renderTable();
         }
     }
 
@@ -356,6 +345,13 @@ function deleteRow(idx) {
         setTimeout(fetchFromCloud, 2000);
     }
 
+    function resetForm() {
+        document.getElementById('fDesc').value = '';
+        document.getElementById('fPreview').style.display = 'none';
+        document.getElementById('fPrompt').style.display = 'block';
+        tempImg = "";
+    }
+
     function addRep() {
         const date = document.getElementById('nDate').value; if(!date) return alert("Date required");
         const m = new Date(date).toLocaleString('default', { month: 'long', year: 'numeric' }).toUpperCase();
@@ -365,52 +361,33 @@ function deleteRow(idx) {
         showHome();
     }
   
-function loadImg(input) {
-    if(input.files && input.files[0]) {
-        const reader = new FileReader();
-        reader.onload = e => {
-            const img = new Image();
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                let w = img.width, h = img.height;
-                // Reduce maximum width to 600px for faster syncing
-                if (w > 600) { h *= 600 / w; w = 600; }
-                canvas.width = w; canvas.height = h;
-                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-                // Lowered quality to 0.4 for 40% smaller file size
-                tempImg = canvas.toDataURL('image/jpeg', 0.4); 
-                document.getElementById('fPreview').src = tempImg;
-                document.getElementById('fPreview').style.display = 'block';
-                document.getElementById('fPrompt').style.display = 'none';
+    function loadImg(input) {
+        if(input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    if (w > 600) { h *= 600 / w; w = 600; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    tempImg = canvas.toDataURL('image/jpeg', 0.4); 
+                    document.getElementById('fPreview').src = tempImg;
+                    document.getElementById('fPreview').style.display = 'block';
+                    document.getElementById('fPrompt').style.display = 'none';
+                };
+                img.src = e.target.result;
             };
-            img.src = e.target.result;
-        };
-        reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(input.files[0]);
+        }
     }
-}
 
-// OPTIONAL: Add a "Loading" overlay so users know the app is working
-async function fetchFromCloud() {
-    const btn = document.getElementById('syncBtn');
-    btn.style.opacity = "0.5";
-    btn.innerText = "⌛ Downloading...";
-    try {
-        const response = await fetch(GOOGLE_URL);
-        const allData = await response.json();
-        // Clear local DB before update to save memory
-        db = []; 
-        const groups = {};
-        allData.forEach(item => {
-            const key = `${item.unit}|${item.title}`;
-            if(!groups[key]) groups[key] = { unit: item.unit, title: item.title, findings: [] };
-            groups[key].findings.push(item);
-        });
-        db = Object.values(groups);
-        showHome();
-    } catch(e) { alert("Network too slow. Try again."); }
-    btn.style.opacity = "1";
-    btn.innerText = "☁️ Sync Cloud";
-}
+    function zoomImg(src) {
+        if(src === "No Photo") return;
+        document.getElementById('modalImg').src = src;
+        document.getElementById('imageModal').style.display = 'flex';
+    }
 </script>
 </body>
 </html>
