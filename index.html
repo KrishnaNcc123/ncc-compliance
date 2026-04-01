@@ -267,42 +267,67 @@
     }
 
     function openRep(unit, title) {
-        activeUnit = unit; activeTitle = title;
-        document.getElementById('hTitle').innerText = title; document.getElementById('hUnit').innerText = unit;
-        document.getElementById('dash').classList.add('hidden'); document.getElementById('details').classList.remove('hidden');
-        document.getElementById('addSection').className = (isHR || user === unit) ? 'card' : 'hidden';
-        renderTable();
+    activeUnit = unit; 
+    activeTitle = title;
+    
+    document.getElementById('hTitle').innerText = title; 
+    document.getElementById('hUnit').innerText = unit;
+    document.getElementById('dash').classList.add('hidden'); 
+    document.getElementById('details').classList.remove('hidden');
+    
+    // STRICT LOCK: Only "NCC HR" can see the "Add New NC" form
+    if (isHR) {
+        document.getElementById('addSection').classList.remove('hidden');
+    } else {
+        document.getElementById('addSection').classList.add('hidden');
     }
+    
+    renderTable();
+}
 
-    function renderTable() {
-        const report = db.find(r => r.unit === activeUnit && r.title === activeTitle) || { findings: [] };
-        const tbody = document.getElementById('fTable'); tbody.innerHTML = '';
-        let s = {tot:0, crit:0, maj:0, min:0};
-        
-        report.findings.forEach((f, idx) => {
-            s.tot++; s[f.sev]++;
-            tbody.innerHTML += `<tr>
-                <td><img src="${f.img}" style="width:55px; height:55px; border-radius:10px; object-fit:cover; cursor:zoom-in;" onclick="zoomImg('${f.img}')"></td>
-                <td style="font-weight:800; font-size:11px;">${f.dept}</td>
-                <td style="max-width:350px; line-height:1.5; font-weight:500;">${f.desc}</td>
-                <td><span class="badge bg-${f.sev}">${f.sev}</span></td>
-                <td><span style="font-weight:900; font-size:10px; color:${f.stat==='Open'?'#ef4444':'#10b981'}">${f.stat.toUpperCase()}</span></td>
+function renderTable() {
+    const report = db.find(r => r.unit === activeUnit && r.title === activeTitle) || { findings: [] };
+    const tbody = document.getElementById('fTable'); 
+    tbody.innerHTML = '';
+    
+    report.findings.forEach((f, idx) => {
+        // STRICT LOCK: Only HR gets the action buttons
+        let actionColumn = "";
+        if (isHR) {
+            actionColumn = `
                 <td>
                     <button class="action-btn btn-edit" onclick="editRow('${idx}')">✎</button>
                     <button class="action-btn btn-del" onclick="deleteRow('${idx}')">🗑</button>
-                </td>
-            </tr>`;
-        });
-        document.getElementById('sTot').innerText = s.tot; document.getElementById('sCri').innerText = s.crit;
-        document.getElementById('sMaj').innerText = s.maj; document.getElementById('sMin').innerText = s.min;
-    }
+                </td>`;
+        } else {
+            // Units see a "Read Only" or Status badge instead
+            actionColumn = `<td><span style="font-size:10px; color:#999;">VIEW ONLY</span></td>`;
+        }
 
-    function deleteRow(idx) {
-        if(!isHR) return alert("Restricted: Only HR Admin can remove entries.");
-        if(confirm("HR MASTER ACCESS: Delete this record?")) {
-            const rIdx = db.findIndex(r => r.unit === activeUnit && r.title === activeTitle);
-            db[rIdx].findings.splice(idx, 1);
-            renderTable();
+        tbody.innerHTML += `<tr>
+            <td><img src="${f.img}" style="width:55px; height:55px; border-radius:10px; object-fit:cover;" onclick="zoomImg('${f.img}')"></td>
+            <td style="font-weight:800;">${f.dept}</td>
+            <td style="max-width:300px;">${f.desc}</td>
+            <td><span class="badge bg-${f.sev}">${f.sev}</span></td>
+            <td><span style="font-weight:900; color:${f.stat==='Open'?'#ef4444':'#10b981'}">${f.stat.toUpperCase()}</span></td>
+            ${actionColumn}
+        </tr>`;
+    });
+}
+
+function deleteRow(idx) {
+    // FINAL SECURITY CHECK
+    if (!isHR) {
+        alert("ACCESS DENIED: Only HR Admin can delete records.");
+        return;
+    }
+    
+    if (confirm("HR MASTER ACCESS: Delete this record permanently?")) {
+        const rIdx = db.findIndex(r => r.unit === activeUnit && r.title === activeTitle);
+        db[rIdx].findings.splice(idx, 1);
+        renderTable();
+        // The deletion will sync to Google Sheets on the next fetch/save
+    }
         }
     }
 
