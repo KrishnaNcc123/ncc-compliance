@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>NCC | Compliance v41</title>
+  <title>IA | Report</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     :root {
@@ -88,17 +88,17 @@
 
 <div id="loginScreen">
   <div class="login-card">
-    <div class="login-logo">NCC</div>
-    <p style="font-weight:800; font-size:0.9rem; color:var(--navy); margin-bottom:25px; letter-spacing:1px;">NETWORK CLOTHING COMPANY</p>
+    <div class="login-logo">IA</div>
+    <p style="font-weight:800; font-size:0.9rem; color:var(--navy); margin-bottom:25px; letter-spacing:1px;">Report</p>
     <div style="text-align: left; padding: 0 10px;">
         <label>Unit Selection</label>
         <select id="lUnit">
-            <option value="NCC HR">HR MASTER ADMIN</option>
-            <option value="UNIT - I (VERTEX)">UNIT - I (VERTEX)</option>
-            <option value="UNIT - II (PRINTING & EMB)">UNIT - II (PRINTING & EMB)</option>
-            <option value="SPECTRA - PROCESSING DIVISION">SPECTRA - PROCESSING DIVISION</option>
-            <option value="UNIT - V (RELAY)">UNIT - V (RELAY)</option>
-            <option value="UNIT - X (PATRIOT)">UNIT - X (PATRIOT)</option>
+            <option value="MASTER USER">MASTER USER</option>
+            <option value="UNIT - V">UNIT - V</option>
+            <option value="UNIT - PE">UNIT - PE</option>
+            <option value="UNIT - SP">UNIT - SP</option>
+            <option value="UNIT - R">UNIT - R</option>
+            <option value="UNIT - P">UNIT - P</option>
         </select>
         <label style="margin-top:15px;">Security Access PIN</label>
         <input type="password" id="lPin" maxlength="6" placeholder="••••">
@@ -109,7 +109,7 @@
 
 <div id="app" class="hidden">
   <header class="app-header">
-    <div style="font-weight:900; font-size:1.5rem; color:var(--primary); cursor:pointer;" onclick="showHome()">NCC</div>
+    <div style="font-weight:900; font-size:1.5rem; color:var(--primary); cursor:pointer;" onclick="showHome()">IA</div>
     <div style="display:flex; align-items:center; gap:12px;">
         <button id="syncBtn" class="btn btn-outline" onclick="fetchFromCloud()">☁️ Sync Cloud</button>
         <div id="pinSettings" class="hidden" style="position:relative;">
@@ -129,10 +129,10 @@
     <div id="hrNew" class="card hidden" style="border-top:5px solid var(--primary);">
         <label>Create Audit Schedule</label>
         <div style="display:grid; grid-template-columns: 1fr 1fr 1.2fr auto; gap:12px; align-items:end;">
-            <select id="nUnit"><option>UNIT - I (VERTEX)</option><option>UNIT - II (PRINTING & EMB)</option><option>SPECTRA - PROCESSING DIVISION</option><option>UNIT - V (RELAY)</option><option>UNIT - X (PATRIOT)</option></select>
-            <select id="nCat"><option>INTERNAL AUDIT</option><option>5S COMPLIANCE</option><option>SAFETY AUDIT</option></select>
+            <select id="nUnit"><option>UNIT - V</option><option>UNIT - PE</option><option>UNIT - SP</option><option>UNIT - R</option><option>UNIT - X (PATRIOT)</option></select>
+            <select id="nCat"><option>IA</option><option>5S</option><option>SA</option></select>
             <input type="date" id="nDate">
-            <button class="btn btn-primary" onclick="addRep()">Create Folder</button>
+            <button class="btn btn-primary" onclick="addRep()">Generate Report</button>
         </div>
     </div>
     <div id="repGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:20px;"></div>
@@ -189,26 +189,26 @@
     
     let db = [];
     let pins = {
-        "NCC HR": "3355", 
-        "UNIT - I (VERTEX)": "1100", 
-        "UNIT - II (PRINTING & EMB)": "0220", 
-        "SPECTRA - PROCESSING DIVISION": "8822", 
-        "UNIT - V (RELAY)": "5151", 
-        "UNIT - X (PATRIOT)": "1001"
+        "MASTER USER": "3355", 
+        "UNIT - V": "1100", 
+        "UNIT - PE": "0220", 
+        "UNIT - SP": "8822", 
+        "UNIT - R": "5151", 
+        "UNIT - P": "1001"
     };
 
-    let user = ""; let isHR = false; let activeTitle = ""; let activeUnit = ""; let tempImg = "";
+    let user = ""; let isMASTER = false; let activeTitle = ""; let activeUnit = ""; let tempImg = "";
 
     async function login() {
         const u = document.getElementById('lUnit').value;
         const p = document.getElementById('lPin').value;
         if(pins[u] === p) {
-            user = u; isHR = (u === "NCC HR");
+            user = u; isHR = (u === "MASTER USER");
             document.getElementById('userTag').innerText = u;
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('app').classList.remove('hidden');
-            if(isHR) { 
-                document.getElementById('hrNew').classList.remove('hidden'); 
+            if(isMASTER) { 
+                document.getElementById('masterNew').classList.remove('hidden'); 
                 document.getElementById('pinSettings').classList.remove('hidden'); 
                 renderPinList(); 
             }
